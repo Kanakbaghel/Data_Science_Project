@@ -1,2 +1,3 @@
-# Data_Science_Project
-TechNest Task 3 : END-TO-END DATA SCIENCE PROJECT on E-Commerce Shipping. A well documented Jupyter notebook with insights and visuals.
+<h1 align="center"> END TO END DATA SCIENCE PROJECT </h1>
+<p align="center"><em>TechNest Task 3 : E-Commerce Shipping Data </em></p>
+---
