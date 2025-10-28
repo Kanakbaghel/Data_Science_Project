@@ -1,7 +1,11 @@
 <h1 align="center"> END TO END DATA SCIENCE PROJECT </h1>
 <p align="center"><em>TechNest Task 3 : E-Commerce Shipping Data </em></p>
+
 ---
 
+<img width="800" height="400" alt="image" src="https://github.com/user-attachments/assets/f21b082d-6c0c-4689-9aaa-6a1cab270e33" />
+
+----------
 A full end-to-end data science project analyzing e-commerce shipping data to uncover insights, optimize delivery, and predict shipping outcomes using industry-standard machine learning methods and visual storytelling.
 
 ***
