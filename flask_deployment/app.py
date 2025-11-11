@@ -1,3 +1,7 @@
+import os
+print("Current working directory:", os.getcwd())
+print("Files in flask_deployment:", os.listdir("flask_deployment"))
+
 from flask import Flask, request, render_template
 import joblib
 import pandas as pd
@@ -7,7 +11,7 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 app = Flask(__name__)
 
 # Load your model (ensure model.pkl is in flask_deployment)
-model = joblib.load('model.pkl')
+model = joblib.load("flask_deployment/model.pkl")
 
 # Recreate preprocessors (match your notebook exactly)
 scaler = StandardScaler()
