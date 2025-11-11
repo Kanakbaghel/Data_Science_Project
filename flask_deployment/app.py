@@ -1,24 +1,28 @@
 import os
-print("Current working directory:", os.getcwd())
-print("Files in flask_deployment:", os.listdir("flask_deployment"))
-
 from flask import Flask, request, render_template
 import joblib
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 
-app = Flask(__name__)
+# Initialize Flask app and specify template and static folders
+app = Flask(__name__, 
+            template_folder='templates', 
+            static_folder='static')
 
-# Load your model (ensure model.pkl is in flask_deployment)
-model = joblib.load("flask_deployment/model.pkl")
+# Load the trained ML model
+model_path = os.path.join(os.path.dirname(__file__), 'model.pkl')
+model = joblib.load(model_path)
 
-# Recreate preprocessors (match your notebook exactly)
-scaler = StandardScaler()
-# Fit scaler on dummy data or load if saved; for simplicity, assume you refit here with sample data
-# Example: scaler.fit([[mean_values]]) – replace with your training data means if needed
+# Initialize LabelEncoders and other preprocessors (use your exact notebook logic)
 le_warehouse = LabelEncoder()
-le_warehouse.fit(['A', 'B', 'C', 'D', 'F'])  # From your notebook
+le_warehouse.fit(['A', 'B', 'C', 'D', 'F'])  # Example categories
+
+scaler = StandardScaler()
+# NOTE: For real deployment, fit the scaler on training data and save it separately,
+# Then load here. For demonstration, scaler is fit on dummy data
+dummy_data = np.array([[0,0,0,0,0]])  # Adjust shape as needed
+scaler.fit(dummy_data)
 
 @app.route('/')
 def home():
@@ -26,50 +30,54 @@ def home():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    # Extract form data (based on your notebook features)
-    customer_care_calls = float(request.form['Customer_care_calls'])
-    cost_of_product = float(request.form['Cost_of_the_Product'])
-    prior_purchases = float(request.form['Prior_purchases'])
-    product_importance = request.form['Product_importance']
-    gender = request.form['Gender']
-    discount_offered = float(request.form['Discount_offered'])
-    weight_in_gms = float(request.form['Weight_in_gms'])
-    warehouse_block = request.form['Warehouse_block']
-    mode_of_shipment = request.form['Mode_of_Shipment']
+    try:
+        # Extract input data from form
+        data = request.form
+        customer_care_calls = float(data['Customer_care_calls'])
+        cost_of_product = float(data['Cost_of_the_Product'])
+        prior_purchases = float(data['Prior_purchases'])
+        product_importance = data['Product_importance']
+        gender = data['Gender']
+        discount_offered = float(data['Discount_offered'])
+        weight_in_gms = float(data['Weight_in_gms'])
+        warehouse_block = data['Warehouse_block']
+        mode_of_shipment = data['Mode_of_Shipment']
 
-    # Preprocess (replicate notebook: encoding, scaling)
-    warehouse_encoded = le_warehouse.transform([warehouse_block])[0]
-    # One-hot for product_importance (as in your notebook)
-    prod_low = 1 if product_importance == 'low' else 0
-    prod_medium = 1 if product_importance == 'medium' else 0
-    prod_high = 1 if product_importance == 'high' else 0
-    gender_encoded = 1 if gender == 'M' else 0  # Binary
+        # Encode categorical variables
+        warehouse_encoded = le_warehouse.transform([warehouse_block])[0]
+        prod_low = 1 if product_importance == 'low' else 0
+        prod_medium = 1 if product_importance == 'medium' else 0
+        prod_high = 1 if product_importance == 'high' else 0
+        gender_encoded = 1 if gender == 'M' else 0
 
-    # Create input DataFrame (match your model's columns)
-    input_data = pd.DataFrame({
-        'Customer_care_calls': [customer_care_calls],
-        'Cost_of_the_Product': [cost_of_product],
-        'Prior_purchases': [prior_purchases],
-        'Product_importance_low': [prod_low],
-        'Product_importance_medium': [prod_medium],
-        'Product_importance_high': [prod_high],
-        'Gender': [gender_encoded],
-        'Discount_offered': [discount_offered],
-        'Weight_in_gms': [weight_in_gms],
-        'Warehouse_block': [warehouse_encoded],
-        # Add mode_of_shipment if used in model (e.g., one-hot or encoded)
-    })
+        # Prepare DataFrame with inputs
+        input_df = pd.DataFrame({
+            'Customer_care_calls': [customer_care_calls],
+            'Cost_of_the_Product': [cost_of_product],
+            'Prior_purchases': [prior_purchases],
+            'Product_importance_low': [prod_low],
+            'Product_importance_medium': [prod_medium],
+            'Product_importance_high': [prod_high],
+            'Gender': [gender_encoded],
+            'Discount_offered': [discount_offered],
+            'Weight_in_gms': [weight_in_gms],
+            'Warehouse_block': [warehouse_encoded],
+            # Add mode_of_shipment encoding here if applicable
+        })
 
-    # Scale numerical columns (as in notebook)
-    numerical_cols = ['Customer_care_calls', 'Cost_of_the_Product', 'Prior_purchases', 'Discount_offered', 'Weight_in_gms']
-    # Note: For accuracy, fit scaler on your original training data here or load a saved scaler
-    input_data[numerical_cols] = scaler.fit_transform(input_data[numerical_cols])  # Temporary; use real fit if possible
+        # Scale numerical columns (replace with real scaler fit on training data)
+        numerical_cols = ['Customer_care_calls', 'Cost_of_the_Product', 'Prior_purchases', 'Discount_offered', 'Weight_in_gms']
+        input_df[numerical_cols] = scaler.transform(input_df[numerical_cols])
 
-    # Predict
-    prediction = model.predict(input_data)[0]
-    result = "Reached on Time" if prediction == 1 else "Delayed"  # Based on your target
+        # Predict using the loaded model
+        prediction = model.predict(input_df)[0]
+        result = "Reached on Time" if prediction == 1 else "Delayed"
 
-    return render_template('index.html', prediction_text=f'Prediction: {result}')
+        return render_template('index.html', prediction_text=f'Shipment Status: {result}')
+    
+    except Exception as e:
+        # In case of error, return with error message
+        return render_template('index.html', prediction_text=f'Error: {str(e)}')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)  # Codespaces-specific for public access
+    app.run(host='0.0.0.0', port=5000, debug=True)

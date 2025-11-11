@@ -1,47 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>E-Commerce Shipping Predictor</title>
-    <style> body { font-family: Arial; margin: 20px; } </style>  <!-- Basic styling -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
-    <h1>Predict Shipment Status</h1>
-    <form action="/predict" method="post">
-        <label>Customer Care Calls:</label> <input type="number" name="Customer_care_calls" required><br>
-        <label>Cost of Product:</label> <input type="number" name="Cost_of_the_Product" required><br>
-        <label>Prior Purchases:</label> <input type="number" name="Prior_purchases" required><br>
-        <label>Product Importance:</label>
-        <select name="Product_importance">
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-        </select><br>
-        <label>Gender:</label>
-        <select name="Gender">
-            <option value="F">Female</option>
-            <option value="M">Male</option>
-        </select><br>
-        <label>Discount Offered:</label> <input type="number" name="Discount_offered" required><br>
-        <label>Weight in Gms:</label> <input type="number" name="Weight_in_gms" required><br>
-        <label>Warehouse Block:</label>
-        <select name="Warehouse_block">
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-            <option value="F">F</option>
-        </select><br>
-        <label>Mode of Shipment:</label>
-        <select name="Mode_of_Shipment">
-            <option value="Ship">Ship</option>
-            <option value="Flight">Flight</option>
-            <option value="Road">Road</option>
-        </select><br>
-        <input type="submit" value="Predict Shipment Status">
-    </form>
-    {% if prediction_text %}
-        <h2>{{ prediction_text }}</h2>
-    {% endif %}
+    <div class="container">
+        <h1>Shipment Delay Predictor</h1>
+        <form action="/predict" method="post">
+            <label>Customer Care Calls:</label>
+            <input type="number" name="Customer_care_calls" required /><br />
+
+            <label>Cost of Product:</label>
+            <input type="number" name="Cost_of_the_Product" required /><br />
+
+            <label>Prior Purchases:</label>
+            <input type="number" name="Prior_purchases" required /><br />
+
+            <label>Product Importance:</label>
+            <select name="Product_importance">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+            </select><br />
+
+            <label>Gender:</label>
+            <select name="Gender">
+                <option value="F">Female</option>
+                <option value="M">Male</option>
+            </select><br />
+
+            <label>Discount Offered:</label>
+            <input type="number" name="Discount_offered" required /><br />
+
+            <label>Weight in Grams:</label>
+            <input type="number" name="Weight_in_gms" required /><br />
+
+            <label>Warehouse Block:</label>
+            <select name="Warehouse_block">
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+                <option value="F">F</option>
+            </select><br />
+
+            <label>Mode of Shipment:</label>
+            <select name="Mode_of_Shipment">
+                <option value="Ship">Ship</option>
+                <option value="Flight">Flight</option>
+                <option value="Road">Road</option>
+            </select><br />
+
+            <button type="submit">Predict</button>
+        </form>
+
+        {% if prediction_text %}
+        <p class="result">{{ prediction_text }}</p>
+        {% endif %}
+    </div>
 </body>
 </html>
